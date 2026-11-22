@@ -73,7 +73,7 @@ const {paths,mun,D,names,meta,LAB,GY}=DATA;
 const BLUES=['#dbe6f1','#a8c0d9','#7499bb','#46698f','#1e3550'];
 const PARTS=[['PP','PP','#1f6fb5',3],['PSOE','PSOE','#d03b30',4],['VOX','Vox','#5c9a3a',7],['IZQ','Izquierda alternativa','#8e44ad',5],['CS','Cs','#e8892b',6]];
 const $=id=>document.getElementById(id),NS='http://www.w3.org/2000/svg';
-const fmtN=v=>v.toLocaleString('es-ES'),pc=v=>v.toFixed(1).replace('.',',')+' %';
+const fmtN=v=>v.toLocaleString('es-ES'),pc=v=>v.toFixed(1).replace('.',',')+'%';
 let ye='202307',oe=null,cur=null,pt=null,Q=[],els={},vb=[0,0,meta.W,meta.H];
 Object.keys(LAB).forEach(e=>{const b=document.createElement('button');b.textContent=LAB[e];b.dataset.k=e;b.onclick=()=>{ye=e;oe=null;update(cur||undefined)};$('yb').appendChild(b)});
 /* ---- geometry ---- */
@@ -146,7 +146,7 @@ function drawHist(k){const box=$('hist');if(!box)return;const ser=HIS.S[k];if(!s
  const pts=zs.map((v,j)=>v==null?null:[x(j),y(v)]).filter(Boolean);
  o+=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${P[2]}" stroke-width="3.5" stroke-linejoin="round" stroke-linecap="round" pathLength="1" style="stroke-dasharray:1;animation:hd 1s both"/>`;
  zs.forEach((v,j)=>{if(v!=null)o+=`<circle cx="${x(j)}" cy="${y(v)}" r="4" fill="${P[2]}" stroke="#fff" stroke-width="1.5"/>`});
- {const mxj=ok.reduce((a,j)=>zs[j]>zs[a]?j:a,ok[0]),mnj=ok.reduce((a,j)=>zs[j]<zs[a]?j:a,ok[0]);[[mxj,-9],[mnj,16]].forEach(([j,dy])=>{if(ok.length>2)o+=`<text x="${Math.min(W-R-12,Math.max(L+12,x(j)))}" y="${y(zs[j])+dy}" text-anchor="middle" font-size="11" font-weight="700" fill="${P[2]}">${zs[j].toFixed(0)} %</text>`})}
+ {const mxj=ok.reduce((a,j)=>zs[j]>zs[a]?j:a,ok[0]),mnj=ok.reduce((a,j)=>zs[j]<zs[a]?j:a,ok[0]);[[mxj,-9],[mnj,16]].forEach(([j,dy])=>{if(ok.length>2)o+=`<text x="${Math.min(W-R-12,Math.max(L+12,x(j)))}" y="${y(zs[j])+dy}" text-anchor="middle" font-size="11" font-weight="700" fill="${P[2]}">${zs[j].toFixed(0)}%</text>`})}
  o+='<g id="hm"></g>';
  E14.forEach((e,j)=>{o+=`<rect data-j="${j}" x="${x(j)-(W-L-R)/(n-1)/2}" y="${T}" width="${(W-L-R)/(n-1)}" height="${H-T-B}" fill="transparent" style="cursor:pointer"/>`});
  svg.innerHTML=o;

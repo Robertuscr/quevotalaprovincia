@@ -37,7 +37,7 @@ function draw(){const g=cur(),rows=document.getElementById('rows');
   document.getElementById('lg').innerHTML=PN.map((n,k)=>`<span><i style="background:${PCOL[k]}"></i>${n}</span>`).join('')}
  const rs=rows.children;
  g.forEach((x,i)=>{const r=rs[i];r.querySelector('.lab span').textContent=x?eur(x.renta)+' por persona':'';const d=r.querySelectorAll('.bar div');
-  if(!x){d.forEach(e=>{e.style.width='0'});return}const s=seg(x);d.forEach((e,k)=>{e.style.width=s[k]+'%';e.textContent=s[k]>=7?Math.round(s[k])+' %':'';e.title=PN[k]+' '+f1(s[k])+' %'})});
+  if(!x){d.forEach(e=>{e.style.width='0'});return}const s=seg(x);d.forEach((e,k)=>{e.style.width=s[k]+'%';e.textContent=s[k]>=7?Math.round(s[k])+'%':'';e.title=PN[k]+' '+f1(s[k])+'%'})});
  const a=g[0],b=g[4],dp=(k)=>b.p[k]-a.p[k],L=EL.find(x=>x[0]===yr)[1];
  const pp=dp(0),ps=dp(1),vx=dp(4);
  const word=(v)=>Math.abs(v)<.5?'lo mismo que':(v>0?f1(Math.abs(v))+' puntos más':f1(Math.abs(v))+' puntos menos');
