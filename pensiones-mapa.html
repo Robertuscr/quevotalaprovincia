@@ -26,7 +26,7 @@ function ramp(t){t=Math.max(0,Math.min(1,t))*3;const i=Math.min(2,Math.floor(t))
 function win(z){let b=0,bi=1;for(let i=1;i<=5;i++)if(z[i]>b){b=z[i];bi=i}return bi-1}
 let city='Provincia',mode='pen',paths=[];
 function chips(){$('cc').innerHTML=Object.keys(DATA).map(c=>`<button class="${c===city?'on':''}" data-c="${c}">${c}</button>`).join('');
- $('cm').innerHTML=[['pen','Peso de las pensiones'],['win','Quién ganó']].map(([k,l])=>`<button class="${k===mode?'on':''}" data-m="${k}">${l}</button>`).join('');
+ $('cm').style.display='none';
  $('cc').onclick=e=>{const b=e.target.closest('button');if(b){city=b.dataset.c;chips();build()}};$('cm').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;chips();paint()}}}
 function build(){const d=DATA[city],sv=$('sv');sv.setAttribute('viewBox',d.vb.join(' '));sv.innerHTML='';paths=[];
  d.secs.forEach(s=>{const p=document.createElementNS(NS,'path');p.setAttribute('d',s.d);p.style.fill='#dfe6ee';p._s=s;sv.appendChild(p);paths.push(p)});
