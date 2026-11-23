@@ -55,7 +55,7 @@ let view='pue',year='202307',area='Provincia',paths=[],timer=null;
 const YK=Object.keys(D.lab),izq=y=>y<'201512'?'IU':y==='201512'?'Podemos e IU':y==='201606'?'Unidos Podemos':y<'202307'?'Unidas Podemos':'Sumar';
 const BY=y=>!!D.secs.sd[y],YOK=y=>view==='pue'?D.years.includes(y):BY(y);
 function setYear(y){year=y;if(view!=='pue'){build();key();return}paint();side();serie()}
-function ui(){$('seg').innerHTML=[['pue','Pueblos'],['bar','Barrios'],['win','Quién ganó']].map(([k,l])=>`<button class="${k===view?'on':''}" data-v="${k}">${l}</button>`).join('');
+function ui(){$('seg').innerHTML=[['pue','Pueblos'],['bar','Barrios']].map(([k,l])=>`<button class="${k===view?'on':''}" data-v="${k}">${l}</button>`).join('');
  $('areas').innerHTML=view!=='pue'?Object.keys(D.views).map(a=>`<button class="${a===area?'on':''}" data-a="${a}">${a}</button>`).join(''):'';
  key()}
 $('seg').onclick=e=>{const b=e.target.closest('button');if(!b||b.dataset.v===view)return;stop();view=b.dataset.v;if(view!=='pue'){if(!BY(year))year='202307'}ui();build()};
@@ -69,13 +69,13 @@ function build(){const sv=$('sv');sv.innerHTML=`<defs><pattern id="hatch" width=
 const PC={PP:[31,111,181],PSOE:[208,59,48],VOX:[92,154,58],IZQ:[142,68,173],CS:[232,137,43]},CR=[246,240,228];
 const PN=k=>k==='IZQ'?izq(year):k==='VOX'?'Vox':k==='CS'?'Cs':k;
 function winC(k,p){const b=PC[k]||[120,120,120],t=Math.max(0,Math.min(1,(p-55)/(88-55))),f=.18+.82*t;return `rgb(${b.map((c,i)=>Math.round(CR[i]+(c-CR[i])*f)).join(',')})`}
-function key(){const k=$('key');if(view==='win'){const ps=[...new Set(Object.values(D.secs.sd[year]).map(r=>r[2]))].sort((a,b)=>['PP','PSOE','VOX','IZQ','CS'].indexOf(a)-['PP','PSOE','VOX','IZQ','CS'].indexOf(b));
+function key(){const k=$('key');if(view==='bar'){const ps=[...new Set(Object.values(D.secs.sd[year]).map(r=>r[2]))].sort((a,b)=>['PP','PSOE','VOX','IZQ','CS'].indexOf(a)-['PP','PSOE','VOX','IZQ','CS'].indexOf(b));
  k.innerHTML=`<span>Menos participación</span>`+ps.map(p=>`<span class="kp"><i style="width:70px;background:linear-gradient(90deg,${winC(p,55)},${winC(p,88)})"></i>${PN(p)}</span>`).join('')+`<span>Más participación</span>`}
  else k.innerHTML=`<span>Menos abstención</span><i></i><span>Más abstención</span>`+(view==='pue'?`<em id="nm"><s></s>Aún no era municipio</em>`:'')}
-function paint(){paths.forEach(p=>{if(p._s){const r=D.secs.sd[year][p._s.c];p.style.fill=!r?'url(#hatch)':view==='win'?winC(r[2],r[1]):ramp(100-r[1]);return}const r=D.muni[year][p._c];p.style.fill=r&&r[0]?ramp(100*(1-r[1]/r[0])):'url(#hatch)'})}
+function paint(){paths.forEach(p=>{if(p._s){const r=D.secs.sd[year][p._s.c];p.style.fill=!r?'url(#hatch)':view==='bar'?winC(r[2],r[1]):ramp(100-r[1]);return}const r=D.muni[year][p._c];p.style.fill=r&&r[0]?ramp(100*(1-r[1]/r[0])):'url(#hatch)'})}
 const tip=$('tip');
 $('sv').onmousemove=$('sv').onclick=ev=>{const p=ev.target;if(!p._c&&!p._s){tip.style.opacity=0;return}let h;
- if(p._s){const s=p._s,r=D.secs.sd[year][s.c];h=`<b>${s.n}${s.m?` · distrito ${+s.c.slice(5,7)}, sección ${+s.c.slice(7)}`:''}</b> · ${D.lab[year]}`+(!r?'<br>Sin datos':view==='win'?`<strong style="color:rgb(${PC[r[2]]})">Ganó ${PN(r[2])}</strong>${[['PP',r[3]],['PSOE',r[4]],['VOX',r[5]],['IZQ',r[6]],['CS',r[7]]].filter(x=>x[1]>=3).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${PN(k)} ${f1(v)}%`).join(' · ')}<br>Votó el ${f1(r[1])}%`:`<strong>${f1(100-r[1])}%</strong>${fn(r[0]*(100-r[1])/100)} de ${fn(r[0])} electores no votaron`)}
+ if(p._s){const s=p._s,r=D.secs.sd[year][s.c];h=`<b>${s.n}${s.m?` · distrito ${+s.c.slice(5,7)}, sección ${+s.c.slice(7)}`:''}</b> · ${D.lab[year]}`+(!r?'<br>Sin datos':view==='bar'?`<strong style="color:rgb(${PC[r[2]]})">Ganó ${PN(r[2])}</strong>${[['PP',r[3]],['PSOE',r[4]],['VOX',r[5]],['IZQ',r[6]],['CS',r[7]]].filter(x=>x[1]>=3).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`${PN(k)} ${f1(v)}%`).join(' · ')}<br>Votó el ${f1(r[1])}%`:`<strong>${f1(100-r[1])}%</strong>${fn(r[0]*(100-r[1])/100)} de ${fn(r[0])} electores no votaron`)}
  else{const r=D.muni[year][p._c];h=r&&r[0]?`<b>${p._n}</b><strong>${f1(100*(1-r[1]/r[0]))}%</strong>${fn(r[0]-r[1])} de ${fn(r[0])} electores no votaron`:`<b>${p._n}</b><br>En ${D.lab[year]} aún no era municipio`}
  tip.innerHTML=h;const b=$('sv').parentNode.getBoundingClientRect();let x=ev.clientX-b.left+14,y=ev.clientY-b.top+14;if(x>b.width-240)x=ev.clientX-b.left-240;if(y>b.height-100)y=ev.clientY-b.top-100;tip.style.left=Math.max(4,x)+'px';tip.style.top=Math.max(4,y)+'px';tip.style.opacity=1};
 $('sv').onmouseleave=()=>tip.style.opacity=0;
