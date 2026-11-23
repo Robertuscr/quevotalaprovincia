@@ -21,7 +21,7 @@ h1{font:700 30px/1.1 Georgia,serif;margin:0 0 4px;letter-spacing:-.01em}.sub{col
 #tip{position:absolute;pointer-events:none;background:#fff;color:var(--noche);padding:9px 12px;border-radius:10px;font-size:12.5px;line-height:1.45;opacity:0;transition:opacity .12s;z-index:3;max-width:230px;box-shadow:0 4px 18px rgba(30,53,80,.22);border-top:4px solid var(--noche)}
 #tip b{font-size:13.5px}#tip strong{font:700 22px/1.1 Georgia,serif;display:block;margin:2px 0}
 /* debajo */
-.low{display:grid;grid-template-columns:1fr;gap:26px;margin-top:22px}@media(min-width:780px){.low{grid-template-columns:1.25fr 1fr}}
+.low{display:grid;grid-template-columns:1fr;gap:26px;margin-top:22px}@media(min-width:780px){.low{grid-template-columns:1fr 1.15fr;align-items:start}}
 .low h3{font:700 19px/1.2 Georgia,serif;margin:0 0 4px}.low p.k{margin:0 0 12px;color:var(--mute);font-size:13.5px}
 .db{position:relative}.dr{display:grid;grid-template-columns:96px 1fr;align-items:center;height:40px;border-bottom:1px solid #eee}.dr span{font-weight:700;font-size:13.5px}
 .tr{position:relative;height:100%}.tr .ln{position:absolute;top:50%;height:4px;margin-top:-2px;border-radius:2px;opacity:.35;transition:all .6s}
@@ -40,8 +40,8 @@ h1{font:700 30px/1.1 Georgia,serif;margin:0 0 4px;letter-spacing:-.01em}.sub{col
 <div class="big"><div class="y" id="by"></div><div class="n" id="bn"></div><div class="t" id="bt"></div></div>
 <div class="seg" id="seg"></div><div class="areas" id="areas"></div><div id="tip"></div></div>
 <div class="key"><span>Menos abstención</span><i></i><span>Más abstención</span><em id="nm"><s></s>Aún no era municipio</em></div>
-<div class="low"><div><h3 id="qt"></h3><p class="k" id="qk"></p><div class="wc" id="wc"></div><h3 style="margin-top:22px">Cada partido frente a su resultado en la provincia</h3><p class="k" id="dk2"></p><svg id="dv" viewBox="0 0 560 250"></svg></div>
-<div class="rk" id="rk"><h3>Los extremos</h3><p class="k" id="rkk"></p><h4>Donde más se quedaron en casa</h4><ul id="t1"></ul><h4>Donde más se votó</h4><ul id="t0"></ul></div></div>
+<div class="low"><div><h3 id="qt"></h3><p class="k" id="qk"></p><div class="wc" id="wc"></div></div><div><h3>Cada partido frente a su resultado en la provincia</h3><p class="k" id="dk2"></p><svg id="dv" viewBox="0 0 560 250"></svg></div>
+</div>
 </div>
 <script>
 if(/[?&]embed/.test(location.search))document.body.classList.add('emb');
@@ -98,9 +98,6 @@ function side(){const s=D.ser.find(r=>r[0]===D.lab[year]),a=100*(1-s[2]/s[1]);
  $('wc').innerHTML=card(q.lo,'Barrios que menos votaron')+card(q.hi,'Barrios que más votaron');
  $('dk2').innerHTML=`Puntos por encima o por debajo de lo que sacó en toda la provincia ese año.<br><span class="sw"><i></i>Barrios que menos votaron</span><span class="sw"><i class="f"></i>Barrios que más votaron</span>`;
  dv();
- const src=view==='pue'?Object.entries(D.muni[year]).filter(([c,r])=>r[0]>0&&D.mun[c]).map(([c,r])=>[D.mun[c][0],100*(1-r[1]/r[0])]):D.secs.filter(s=>!D.views[area].c||s.c.slice(0,5)===D.views[area].c).map(s=>[s.n+(s.m?` · ${+s.c.slice(5,7)}-${+s.c.slice(7)}`:''),100-s.p]);
- const m=src.sort((x,y)=>y[1]-x[1]),top=m[0][1];$('rkk').textContent=view==='pue'?`Municipios · ${D.lab[year]}`:`Secciones censales · ${area} · 2023`;
- const li=(a,c)=>a.map(([n,v])=>`<li><span>${n}</span><b class="r">${f1(v)}%</b><div class="m"><i style="width:${v/top*100}%;background:${c}"></i></div></li>`).join('');
- $('t1').innerHTML=li(m.slice(0,5),'#1e3550');$('t0').innerHTML=li(m.slice(-5).reverse(),'#c9b48f')}
+}
 ui();build();let rw=innerWidth,rt;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if((rw<600)!==(innerWidth<600)){rw=innerWidth;build()}},200)});
 </script></body></html>
