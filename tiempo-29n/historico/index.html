@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tiempo en las generales</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=Archivo+Narrow:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE: graphics desk of a regional paper, direct and warm
+   IDEA: a row of thermometers laid flat, one per election day
+   PICTURE: range bar from min to max for each of the 17 generales, 29N marked as forecast
+   COLOUR and TYPE: La Tribuna red as the one accent, cold slate to warm red by temperature; Archivo + Archivo Narrow
+   LAYOUT: title, toggle, one tall chart of rows, tapped row opens a detail line, source */
+:root{color-scheme:light dark;
+--bg:light-dark(#ffffff,#141414);--ink:light-dark(#1b1b1b,#f1f1f1);--soft:light-dark(#6b6b6b,#a9a9a9);
+--line:light-dark(#e6e6e6,#2c2c2c);--red:#c8102e;--hi:light-dark(#fbe9ec,#3a1218);--panel:light-dark(#f5f5f4,#1f1f1f)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Archivo,system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:860px;margin:0 auto;padding:clamp(18px,3vw,32px) max(4vw,14px)}
+h1{font-size:clamp(24px,4.2vw,38px);line-height:1.08;margin:0 0 6px;font-weight:800;text-wrap:balance;letter-spacing:-.01em}
+.sub{color:var(--soft);margin:0 0 18px;font-size:16px}
+.ctrl{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.ctrl button{font:600 15px Archivo,sans-serif;min-height:44px;padding:0 16px;border-radius:22px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.ctrl button[aria-pressed=true]{background:var(--red);border-color:var(--red);color:#fff}
+.ctrl button:focus-visible,.row:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.chart{position:relative}
+.axis,.row{display:grid;grid-template-columns:6.4rem minmax(0,1fr);align-items:center}
+.axis{height:26px;font:500 13px "Archivo Narrow",sans-serif;color:var(--soft)}
+.ticks{position:relative;height:100%}
+.ticks span{position:absolute;top:4px;transform:translateX(-50%)}
+.rows{position:relative}
+.row{position:absolute;left:0;right:0;height:38px;transition:transform .7s cubic-bezier(.6,.05,.2,1);cursor:pointer;border-radius:8px}
+.row.sel{background:var(--panel)}
+.row.now{background:var(--hi)}
+.lab{font:700 15px "Archivo Narrow",sans-serif;padding-left:8px;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.lab small{font-weight:500;color:var(--soft);font-size:13px}
+.track{position:relative;height:100%}
+.grid{position:absolute;top:0;bottom:0;width:1px;background:var(--line)}
+.bar{position:absolute;top:12px;height:14px;border-radius:7px;transform-origin:left;animation:grow .9s ease-out both}
+.row.now .bar{box-shadow:0 0 0 2.5px var(--red)}
+.v{position:absolute;top:9px;font:700 14px "Archivo Narrow",sans-serif;white-space:nowrap}
+.v.mn{transform:translateX(calc(-100% - 6px));color:var(--soft);font-weight:500}
+.v.mx{transform:translateX(6px)}
+.drop{width:11px;height:14px;flex:none}
+.tag{font:700 12px Archivo,sans-serif;color:#fff;background:var(--red);border-radius:4px;padding:1px 6px;margin-left:8px;vertical-align:1px}
+.info{margin-top:14px;min-height:56px;padding:12px 14px;border-radius:10px;background:var(--panel);font-size:16px}
+.info b{font-weight:800}
+.src{color:var(--soft);font-size:13px;margin-top:14px}
+@keyframes grow{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(prefers-reduced-motion:reduce){.bar{animation:none}.row{transition:none}}
+@media(max-width:520px){.axis,.row{grid-template-columns:6rem minmax(0,1fr)}.lab{font-size:14px;padding-left:4px}.v{font-size:13px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>El 29N será la tercera jornada electoral más fría en Ciudad Real</h1>
+  <p class="sub">Temperatura mínima y máxima en la capital el día de cada elección general</p>
+  <div class="ctrl" role="group" aria-label="Orden">
+    <button id="bF" aria-pressed="true">Por fecha</button>
+    <button id="bT" aria-pressed="false">De más fría a más cálida</button>
+  </div>
+  <div class="chart">
+    <div class="axis"><span></span><div class="ticks" id="ticks"></div></div>
+    <div class="rows" id="rows"></div>
+  </div>
+  <div class="info" id="info" aria-live="polite"></div>
+  <p class="src">Fuente: registros diarios de Ciudad Real capital desde 1920 y previsión de AEMET para el 29N.</p>
+</div>
+<script>
+{
+const D=[
+["1977","15 jun","miércoles",10.2,29.6,0,-1.7],
+["1979","1 mar","jueves",-1.0,9.0,0,-4.7],
+["1982","28 oct","jueves",7.4,19.0,0,0.2],
+["1986","22 jun","domingo",12.2,27.4,0,-3.7],
+["1989","29 oct","domingo",6.4,22.2,0,1.6],
+["1993","6 jun","domingo",13.6,23.4,27.8,-1.5],
+["1996","3 mar","domingo",2.6,13.6,0,-1.2],
+["2000","12 mar","domingo",9.2,18.6,0,3.8],
+["2004","14 mar","domingo",4.2,13.0,0,-1.6],
+["2008","9 mar","domingo",4.6,15.2,0,0.5],
+["2011","20 nov","domingo",8.4,13.5,2.9,2.2],
+["2015","20 dic","domingo",2.8,18.1,0,4.3],
+["2016","26 jun","domingo",16.5,34.2,0,1.3],
+["2019","28 abr","domingo",8.3,26.2,0,3.3],
+["2019","10 nov","domingo",6.6,10.6,-1,-1.5],
+["2023","23 jul","domingo",19.9,38.7,0,2.5],
+["2026","29 nov","domingo",5,12,0,null]
+].map((r,i)=>({i,y:r[0],d:r[1],w:r[2],mn:r[3],mx:r[4],ll:r[5],an:r[6],now:r[0]==="2026",m:(r[3]+r[4])/2}));
+const LO=-8,HI=42,RH=40;
+const x=v=>((v-LO)/(HI-LO)*100).toFixed(2)+'%';
+const f=v=>String(v).replace('.',',');
+const col=m=>{const t=Math.max(0,Math.min(1,(m-3)/26));const S=[[47,102,144],[150,160,170],[200,16,46]];const [a,b,u]=t<.5?[S[0],S[1],t*2]:[S[1],S[2],(t-.5)*2];return `rgb(${a.map((c,k)=>Math.round(c+(b[k]-c)*u)).join(',')})`};
+const drop='<svg class="drop" viewBox="0 0 11 14" aria-hidden="true"><path d="M5.5 0C5.5 0 0 6.6 0 9.2a5.5 5.5 0 0 0 11 0C11 6.6 5.5 0 5.5 0Z" fill="#3d678c"/></svg>';
+const tk=[0,10,20,30,40];
+document.getElementById('ticks').innerHTML=tk.map(t=>`<span style="left:${x(t)}">${t}°</span>`).join('');
+const rows=document.getElementById('rows');
+rows.style.height=(D.length*RH)+'px';
+rows.innerHTML=D.map(r=>`<div class="row${r.now?' now':''}" tabindex="0" role="button" data-i="${r.i}" aria-label="${r.d} de ${r.y}">
+<div class="lab">${r.y}<small>${r.d}</small>${r.ll?drop:''}</div>
+<div class="track">${tk.map(t=>`<i class="grid" style="left:${x(t)}"></i>`).join('')}
+<span class="bar" style="left:${x(r.mn)};width:calc(${x(r.mx)} - ${x(r.mn)});background:${col(r.m)};animation-delay:${r.i*45}ms"></span>
+<span class="v mn" style="left:${x(r.mn)}">${f(r.mn)}°</span><span class="v mx" style="left:${x(r.mx)}">${f(r.mx)}°${r.now?'<span class="tag">Previsión</span>':''}</span></div></div>`).join('');
+const els=[...rows.children];
+const order=(by)=>{const s=[...D].sort(by==='t'?(a,b)=>a.m-b.m||a.mx-b.mx:(a,b)=>a.i-b.i);s.forEach((r,k)=>{els[r.i].style.transform=`translateY(${k*RH}px)`})};
+const info=document.getElementById('info');
+const rain=r=>r.ll===-1?'lluvia inapreciable':r.ll>0?`${f(r.ll)} litros por metro cuadrado`:'sin lluvia';
+const show=i=>{const r=D[i];els.forEach(e=>e.classList.toggle('sel',+e.dataset.i===i&&!D[i].now));
+const an=r.an===null?'':` · ${f(Math.abs(r.an))} grados ${r.an>=0?'por encima':'por debajo'} de lo normal`;
+info.innerHTML=`<b>${r.w[0].toUpperCase()+r.w.slice(1)} ${r.d} de ${r.y}${r.now?' (previsión)':''}</b><br>Mínima de ${f(r.mn)}° y máxima de ${f(r.mx)}° · ${rain(r)}${an}`};
+els.forEach(e=>{const go=()=>show(+e.dataset.i);e.addEventListener('click',go);e.addEventListener('mouseenter',go);e.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();go()}})});
+const bF=document.getElementById('bF'),bT=document.getElementById('bT');
+const set=by=>{order(by);bF.setAttribute('aria-pressed',by==='f');bT.setAttribute('aria-pressed',by==='t')};
+bF.addEventListener('click',()=>set('f'));bT.addEventListener('click',()=>set('t'));
+set('f');show(16);
+}
+</script>
+</body>
+</html>
